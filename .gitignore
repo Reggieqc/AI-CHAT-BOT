@@ -1,0 +1,15 @@
+# Dependencies
+**/node_modules/
+
+# Build Output
+**/dist/
+**/out/
+
+# Environment Variables
+**/.env
+
+# IDE and System
+**/.idea/
+**/.vscode/
+**/.DS_Store
+**/*.log

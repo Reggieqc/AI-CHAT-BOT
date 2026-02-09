@@ -1,0 +1,158 @@
+<div
+  class="flex flex-col h-screen bg-gray-950 md:items-center md:justify-center md:bg-gray-900 md:p-4 font-sans"
+>
+  <!-- Chat Window -->
+  <div
+    class="flex flex-col w-full h-full bg-gray-950 md:h-[85vh] md:max-w-4xl md:bg-gray-900 md:rounded-3xl md:shadow-2xl md:border md:border-gray-800 overflow-hidden"
+  >
+    <!-- Header -->
+    <header
+      class="flex items-center gap-4 p-4 border-b border-gray-800 bg-gray-900/95 backdrop-blur z-10"
+    >
+      <div class="flex items-center justify-center w-10 h-10 rounded-full bg-teal-500/10">
+        <i class="bi bi-robot text-xl text-teal-400"></i>
+      </div>
+      <div class="flex flex-col">
+        <h1 class="text-lg font-bold text-gray-100 tracking-tight">Technyks AI Chat</h1>
+        <span class="text-xs font-medium text-teal-500 uppercase tracking-wider"
+          >Your AI assistant</span
+        >
+      </div>
+    </header>
+
+    <!-- Chat History -->
+    <main
+      #scrollContainer
+      class="flex-1 overflow-y-auto scroll-smooth p-4 space-y-6 bg-gray-950 md:bg-gray-900"
+    >
+      <div class="flex flex-col space-y-4">
+        <!-- Empty State -->
+        @if (history().length === 0) {
+          <div class="flex flex-col items-center justify-center h-full text-gray-600 space-y-4">
+            <div class="p-6 rounded-full bg-gray-800/50">
+              <i class="bi bi-chat-square-quote text-4xl"></i>
+            </div>
+            <p class="text-lg font-medium">Start the conversation</p>
+          </div>
+        }
+
+        <!-- Messages Loop -->
+        @for (chat of history(); track $index) {
+          <div
+            class="flex flex-col"
+            [class.self-end]="chat.sender === 'user'"
+            [class.self-start]="chat.sender === 'bot'"
+          >
+            <!-- Bot Icon -->
+            <p
+              [class.text-teal-400]="chat.sender === 'user'"
+              [class.text-gray-400]="chat.sender === 'bot'"
+              [class.me]="chat.sender === 'user'"
+              [class.ms]="chat.sender !== 'bot'"
+              class="mb-1 text-ts"
+            >
+              @if (chat.sender === 'user') {
+                You
+              } @else {
+                @if (chat.modelName) {
+                  {{ chat.modelName }}
+                } @else {
+                  <div
+                    class="flex-shrink-0 w-8 h-8 mr-2 rounded-full bg-gray-800 flex items-center justify-center self-end mb-1"
+                  >
+                    <i class="bi bi-robot text-xs text-gray-400"></i>
+                  </div>
+                }
+              }
+            </p>
+
+            <div
+              class="px-5 py-3 shadow-sm"
+              [class.bg-teal-600]="chat.sender === 'user'"
+              [class.text-white]="chat.sender === 'user'"
+              [class.rounded-2xl]="true"
+              [class.rounded-tr-sm]="chat.sender === 'user'"
+              [class.bg-gray-800]="chat.sender === 'bot'"
+              [class.text-gray-200]="chat.sender === 'bot'"
+              [class.rounded-tl-sm]="chat.sender === 'bot'"
+            >
+              <p class="text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+                {{ chat.message }}
+              </p>
+            </div>
+          </div>
+        }
+
+        <!-- Loading Indicator -->
+        @if (loading()) {
+          <div class="flex w-full justify-start">
+            <div class="flex max-w-[85%] md:max-w-[75%] flex-col gap-2">
+              <!-- Typing Bubble -->
+              <div class="flex items-center gap-2 self-start">
+                <div
+                  class="flex-shrink-0 w-8 h-8 mr-2 rounded-full bg-gray-800 flex items-center justify-center"
+                >
+                  <i class="bi bi-robot text-xs text-gray-400"></i>
+                </div>
+                <div
+                  class="px-4 py-3 bg-gray-800 rounded-2xl rounded-tl-sm text-gray-400 flex items-center gap-1"
+                >
+                  <span class="w-1.5 h-1.5 bg-teal-500 rounded-full animate-bounce"></span>
+                  <span
+                    class="w-1.5 h-1.5 bg-teal-500 rounded-full animate-bounce [animation-delay:0.2s]"
+                  ></span>
+                  <span
+                    class="w-1.5 h-1.5 bg-teal-500 rounded-full animate-bounce [animation-delay:0.4s]"
+                  ></span>
+                  <span class="ml-2 text-xs font-medium">Bot is typing...</span>
+                </div>
+              </div>
+
+              <!-- Skeleton Text -->
+              <div class="ml-12 w-64 space-y-2 p-2">
+                <div class="h-2 bg-gray-800 rounded w-full animate-pulse"></div>
+                <div class="h-2 bg-gray-800 rounded w-4/5 animate-pulse"></div>
+                <div class="h-2 bg-gray-800 rounded w-2/3 animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Error State -->
+        @if (error()) {
+          <div class="flex justify-center w-full">
+            <div
+              class="flex items-center gap-2 px-4 py-2 text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-full"
+            >
+              <i class="bi bi-exclamation-circle"></i>
+              <span>{{ error() }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </main>
+
+    <!-- Input Area -->
+    <footer class="p-4 bg-gray-900 border-t border-gray-800">
+      <div class="relative flex items-center w-full">
+        <input
+          #msgInput
+          type="text"
+          [value]="message()"
+          (input)="message.set(msgInput.value)"
+          (keydown.enter)="!loading() && msgInput.value.trim() ? sendMessage() : null"
+          [disabled]="loading()"
+          placeholder="Type your message..."
+          class="w-full py-4 pl-6 pr-14 text-gray-100 bg-gray-800 border border-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 placeholder-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-inner"
+        />
+        <button
+          (click)="sendMessage()"
+          [disabled]="!message() || loading()"
+          class="absolute right-2 p-2.5 bg-teal-600 text-white rounded-full hover:bg-teal-500 disabled:opacity-50 disabled:hover:bg-teal-600 transition-all shadow-lg shadow-teal-900/20 flex items-center justify-center group"
+        >
+          <i class="bi bi-send-fill text-sm group-hover:translate-x-0.5 transition-transform"></i>
+        </button>
+      </div>
+    </footer>
+  </div>
+</div>

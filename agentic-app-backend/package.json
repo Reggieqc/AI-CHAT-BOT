@@ -7,7 +7,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "node --watch --env-file=.env src/index.ts",
-    "start": "node --env-file=.env src/index.ts"
+    "start": "node --env-file=.env src/index.ts",
+    "rag:ingest": "node --env-file=.env src/rag/ingest.ts src/data/rag_docs"
   },
   "keywords": [],
   "author": "",

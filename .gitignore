@@ -13,3 +13,6 @@
 **/.vscode/
 **/.DS_Store
 **/*.log
+
+# Data
+**/vector-data

@@ -1,4 +1,5 @@
 import { VectorStoreChroma } from "./dbs/chrome.db.ts";
+import { VectorStorePg } from "./dbs/pgvector.db.ts";
 
 export class VectorStore {
   static get() {
@@ -9,7 +10,7 @@ export class VectorStore {
     }
 
     if (backend === "pgvector") {
-      return;
+      return VectorStorePg;
     }
 
     throw new Error("Invalid VECTOR_DB value. Use pgvector or chroma");
